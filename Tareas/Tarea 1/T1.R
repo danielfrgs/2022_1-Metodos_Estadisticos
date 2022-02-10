@@ -214,3 +214,31 @@ ggplot(municipios, aes(P_5YMAS, P_LI)) +
 
 
 
+
+# Ejecutar para limpiar las variables de la primera parte
+rm(list=ls()) 
+# ------------------------------------------------------------------------------
+# PREGUNTA 2
+# LECTURA DE DATOS
+
+# Declaramos variable 'temp' como un archivo temporal
+temp <- tempfile()
+# Definimos el url del archivo zip
+url_COVID <- 'https://datosabiertos.salud.gob.mx/gobmx/salud/datos_abiertos/datos_abiertos_covid19.zip'
+options(timeout=500)
+download.file(url_COVID, temp)
+
+# Utilizamos la función 'unz' para extraer el archivo CSV y lo asignamos a la variable 'temp'
+ArchivoCsv = unz(temp, "220209COVID19MEXICO.csv")
+# Introducimos los datos del CSV en la tabla.
+
+# AQUI MARCA ERROR NO SUPE SOLUCIONAR ASÍ QUE IMPORTE DIRETAMENTE DE FORMA LOCAL
+covid <- read.csv(file=ArchivoCsv, header=TRUE, sep=",")
+
+covid <- read.csv('/Users/danielfragoso/Downloads/220209COVID19MEXICO.csv')
+
+# Posible alternativa de lectura. Lo averiguaremos proximamente
+library("data.table")
+
+gfg_data <- fread(ArchivoCsv,
+                  select = c("A", "C", "E"))
