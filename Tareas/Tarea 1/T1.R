@@ -233,12 +233,94 @@ ArchivoCsv = unz(temp, "220209COVID19MEXICO.csv")
 # Introducimos los datos del CSV en la tabla.
 
 # AQUI MARCA ERROR NO SUPE SOLUCIONAR ASÍ QUE IMPORTE DIRETAMENTE DE FORMA LOCAL
-covid <- read.csv(file=ArchivoCsv, header=TRUE, sep=",")
+#covid <- read.csv(file=ArchivoCsv, header=TRUE, sep=",")
 
-covid <- read.csv('/Users/danielfragoso/Downloads/220209COVID19MEXICO.csv')
+#covid <- read.csv('/Users/danielfragoso/Downloads/220209COVID19MEXICO.csv')
 
-# Posible alternativa de lectura. Lo averiguaremos proximamente
+# Posible alternativa de lectura. Para seleccionar los datos directamente
 library("data.table")
 
-gfg_data <- fread(ArchivoCsv,
-                  select = c("A", "C", "E"))
+covid <- fread('/Users/danielfragoso/Downloads/220209COVID19MEXICO.csv',
+                  select = c("CLASIFICACION_FINAL", "FECHA_SINTOMAS", "TIPO_PACIENTE", "ENTIDAD_RES"))
+
+
+## 2.1 -------------------------------------------------------------------------
+
+# Vamos a filtrar los datos:
+# CLASIFICACION_FINAL : 1, 2, 3
+# ENTIDAD_RES: 9
+
+covid <- as.data.frame(covid)
+
+covid_cdmx <- covid[(covid[,'CLASIFICACION_FINAL'] < 4) &
+                    (covid[,'ENTIDAD_RES'] == 9),]
+
+## 2.2 ------------------------------------------------------------------------
+
+# a)
+library(tidyverse)
+
+covid_cdmx['CONT'] = 1
+
+casos_mes <- covid_cdmx %>%
+             group_by(month = lubridate::floor_date(FECHA_SINTOMAS, 'month')) %>%
+             summarize(sumamary_variable = sum(CONT))
+
+names(casos_mes) = c("month", 'N_casos')
+
+
+ggplot(casos_mes, aes(x=month, y=N_casos, group=1)) +
+  geom_line(color="#F95C5C", size=1.2) +
+  geom_point(color="#F95C5C", alpha = 0.7, size=1.5) +
+  theme_minimal() +
+  theme(legend.position = "none", axis.text.x = element_text(angle=45, hjust = 1)) +
+  scale_y_continuous(label=comma) +
+  scale_x_date(date_labels = "%b/%y") +
+  labs(y = "Números de Casos", x = "Meses")
+
+# b)
+
+# Suma de 15 días
+covid_cdmx$CASOS15 <- covid_cdmx$FECHA_SINTOMAS + 15
+# Los pacientes hospitalizados son el numero 2
+hosp <- covid_cdmx[(covid_cdmx[, 'TIPO_PACIENTE'] == 2), ]
+
+hosp_mes <- hosp %>%
+  group_by(month = lubridate::floor_date(CASOS15, 'month')) %>%
+  summarize(sumamary_variable = sum(CONT))
+
+names(hosp_mes) = c("month", 'N_hosp')
+# Gráfica
+
+ggplot(hosp_mes, aes(x=month, y=N_hosp, group=1)) +
+  geom_line(color="#F95C5C", size=1.2) +
+  geom_point(color="#F95C5C", alpha = 0.7, size=1.5) +
+  theme_minimal() +
+  theme(legend.position = "none", axis.text.x = element_text(angle=45, hjust = 1)) +
+  scale_y_continuous(label=comma) +
+  scale_x_date(date_labels = "%b/%y") +
+  labs(y = "Número de Hospitalizaciones", x = "Meses")
+
+# c)
+
+# Vamos a generar un Merge Join para unir por mes 
+
+porc_mes <- merge(x = casos_mes, y = hosp_mes, all = TRUE)
+
+# Calculo de porcentaje
+
+porc_mes$porcentaje <- porc_mes$N_hosp/porc_mes$N_casos
+
+# Grafica
+
+ggplot(porc_mes, aes(x=month, y=porcentaje, group=1)) +
+  geom_line(color="#F95C5C", size=1.2) +
+  geom_point(color="#F95C5C", alpha = 0.7, size=1.5) +
+  theme_minimal() +
+  theme(legend.position = "none", axis.text.x = element_text(angle=45, hjust = 1)) +
+  scale_y_continuous(labels = percent_format()) +
+  scale_x_date(date_labels = "%b/%y") +
+  labs(y = "% de Hospitalizados", x = "Meses")
+
+## 2.3 -------------------------------------------------------------------------
+
