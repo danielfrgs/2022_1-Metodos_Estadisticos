@@ -241,7 +241,8 @@ ArchivoCsv = unz(temp, "220209COVID19MEXICO.csv")
 library("data.table")
 
 covid <- fread('/Users/danielfragoso/Downloads/220209COVID19MEXICO.csv',
-                  select = c("CLASIFICACION_FINAL", "FECHA_SINTOMAS", "TIPO_PACIENTE", "ENTIDAD_RES"))
+                  select = c("CLASIFICACION_FINAL", "FECHA_SINTOMAS", "TIPO_PACIENTE", "ENTIDAD_RES", "FECHA_DEF",
+                             "EDAD"))
 
 
 ## 2.1 -------------------------------------------------------------------------
@@ -322,5 +323,115 @@ ggplot(porc_mes, aes(x=month, y=porcentaje, group=1)) +
   scale_x_date(date_labels = "%b/%y") +
   labs(y = "% de Hospitalizados", x = "Meses")
 
+# d)
+
+# La muerte viene en el registro 'FECHA_DEF'
+# Vamos a filtrar los datos para tener fechas válidas
+
+
+def <- covid_cdmx[(covid_cdmx[, 'FECHA_DEF'] != '9999-99-99'), ]
+
+# Convirtamos a fechas para poder agrupar
+
+def$FECHA_DEF <- as.Date(def$FECHA_DEF)
+
+def_mes <- def %>%
+  group_by(month = lubridate::floor_date(FECHA_DEF, 'month')) %>%
+  summarize(sumamary_variable = sum(CONT))
+
+names(def_mes) = c("month", 'N_def')
+# Gráfica
+
+ggplot(def_mes, aes(x=month, y=N_def, group=1)) +
+  geom_line(color="#F95C5C", size=1.2) +
+  geom_point(color="#F95C5C", alpha = 0.7, size=1.5) +
+  theme_minimal() +
+  theme(legend.position = "none", axis.text.x = element_text(angle=45, hjust = 1)) +
+  scale_y_continuous(label=comma) +
+  scale_x_date(date_labels = "%b/%y") +
+  labs(y = "Número de Defunciones", x = "Meses")
+
 ## 2.3 -------------------------------------------------------------------------
+
+# a)
+# Usaremos el registro de 'EDAD' y agruparemos por grupos
+
+covid_g1 <- covid_cdmx[(covid_cdmx[, 'EDAD'] >= 0) & (covid_cdmx[, 'EDAD'] < 20), ]
+
+covid_g2 <- covid_cdmx[(covid_cdmx[, 'EDAD'] >= 20) & (covid_cdmx[, 'EDAD'] < 40), ]
+
+covid_g3 <- covid_cdmx[(covid_cdmx[, 'EDAD'] >= 40) & (covid_cdmx[, 'EDAD'] < 60), ]
+
+covid_g4 <- covid_cdmx[(covid_cdmx[, 'EDAD'] >= 60), ]
+
+# b)
+
+Agr_Mes_Sintomas <- function(dataframe1){
+  mes <- dataframe1 %>%
+    group_by(month = lubridate::floor_date(FECHA_SINTOMAS, 'month')) %>%
+    summarize(casos = sum(CONT))
+  
+  return(mes)
+}
+
+Agr_Mes_Hosp <- function(dataframe1){
+  mes <- dataframe1 %>%
+    group_by(month = lubridate::floor_date(CASOS15, 'month')) %>%
+    summarize(hosp = sum(CONT))
+  
+  return(mes)
+}
+
+# Vamos a hacer una segunda función que nos claucle el porcentaje
+
+Porcentaje_Grupo <- function(dataframe1, nombre){
+  # Los pacientes hospitalizados son el numero 2
+  hosp <- dataframe1[(dataframe1[, 'TIPO_PACIENTE'] == 2), ]
+  
+  grupos_mes <- merge(x = Agr_Mes_Hosp(hosp),
+                      y = Agr_Mes_Sintomas(dataframe1),
+                      all = TRUE)
+  
+  grupos_mes$porcentaje <- grupos_mes$hosp/grupos_mes$casos
+  
+  names(grupos_mes) = c("month", 'hosp', 'casos', nombre)
+  
+  return(grupos_mes[, c('month', nombre)])
+}
+
+# Calculo
+
+Grupos <- list(covid_g1, covid_g2, covid_g3, covid_g4)
+Nombre_G <- c('P_1', 'P_2', 'P_3', 'P_4')
+
+# Merge entre todos
+
+grupo_porc <- Porcentaje_Grupo(Grupos[[1]], Nombre_G[1])
+for (x in 2:4) {
+  grupo_porc <- merge(x = grupo_porc,
+                      y = Porcentaje_Grupo(Grupos[[x]], Nombre_G[x]),
+                      all = TRUE)
+}
+
+# Gráfica
+
+# Vamosa preparar los datos con tydyverse
+
+grupo_porc <- grupo_porc %>%
+  select(month, P_1, P_2, P_3, P_4) %>%
+  gather(key = "variable", value = "value", -month)
+
+cols <- c("#5CB85C", "#46B8DA", "#EEA236", "#F95C5C")
+
+
+ggplot(grupo_porc, aes(x=month, y = value, color = variable)) +
+  geom_line(size=1.2) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle=45, hjust = 1)) +
+  scale_y_continuous(label = percent_format()) +
+  scale_x_date(date_labels = "%b/%y") +
+  labs(y = "% de Hospitalziaciones por Grupo", x = "Meses") +
+  scale_color_manual(values = cols) +
+  scale_color_discrete(labels = c('0-20', '20-40', '40-60', '+60'))+
+  guides(color = guide_legend(title = "Grupos de Edad"))
 
