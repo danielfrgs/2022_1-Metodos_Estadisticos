@@ -116,6 +116,14 @@ ggplot(df, aes(reorder(PEA_estatal$NOM_ENT, PEA_estatal$PEA_P),
   scale_fill_manual(values=c("#F95C5C", "#F4C2A9")) +
   labs(y = "% de Población Economicamente Activa", x = "Entidad")
 
+ggsave(
+  'Tareas/Tarea 1/Graphs/PEA_1.pdf',
+  width = 25,
+  height = 17,
+  units = c("cm"),
+  dpi = 300,
+)
+
 # CDMX
 
 
@@ -152,6 +160,13 @@ ggplot(df, aes(reorder(PEA_cdmx$NOM_MUN, PEA_cdmx$PEA_P),
   scale_fill_manual(values=c("#F95C5C", "#F4C2A9")) +
   labs(y = "% de Población Economicamente Activa", x = "Delegación")
 
+ggsave(
+  'Tareas/Tarea 1/Graphs/PEA_CDMX.pdf',
+  width = 25,
+  height = 17,
+  units = c("cm"),
+  dpi = 300,
+)
 ## 1.3 --------------------------------------------------------------------------
 
 # Personas de 5 a 130 años de edad que hablan alguna lengua indígena.	P5_HLI
@@ -189,7 +204,13 @@ ggplot(df, aes(municipios$P_LI,  municipios$P_A)) +
     scale_x_continuous(labels = percent_format()) +
     labs(y = "% de Población Analfabeta", x = "% de Población que habla una Lengua Indígena")
 
-
+ggsave(
+  'Tareas/Tarea 1/Graphs/PALI_1.pdf',
+  width = 25,
+  height = 17,
+  units = c("cm"),
+  dpi = 300,
+)
 # Graficas Auxiliares
 
 ggplot(municipios, aes(P_15YMAS, P_A)) +
@@ -201,7 +222,14 @@ ggplot(municipios, aes(P_15YMAS, P_A)) +
   #scale_x_continuous(labels = percent_format()) +
   labs(y = "% de Población Analfabeta", x = "Población de 15 años y más")
 
-  
+ggsave(
+  'Tareas/Tarea 1/Graphs/PA15_1.pdf',
+  width = 25,
+  height = 17,
+  units = c("cm"),
+  dpi = 300,
+)
+
 ggplot(municipios, aes(P_5YMAS, P_LI)) +
   geom_point(alpha = 0.5, colour = "#F95C5C")+
   theme_minimal() +
@@ -212,7 +240,13 @@ ggplot(municipios, aes(P_5YMAS, P_LI)) +
   labs(y = "% de Población que habla una Lengua Indígena", x = "Población de 15 años y más")
 
 
-
+ggsave(
+  'Tareas/Tarea 1/Graphs/LI15_1.pdf',
+  width = 25,
+  height = 17,
+  units = c("cm"),
+  dpi = 300,
+)
 
 
 # Ejecutar para limpiar las variables de la primera parte
@@ -222,14 +256,14 @@ rm(list=ls())
 # LECTURA DE DATOS
 
 # Declaramos variable 'temp' como un archivo temporal
-temp <- tempfile()
+#temp <- tempfile()
 # Definimos el url del archivo zip
 url_COVID <- 'https://datosabiertos.salud.gob.mx/gobmx/salud/datos_abiertos/datos_abiertos_covid19.zip'
-options(timeout=500)
-download.file(url_COVID, temp)
+#options(timeout=500)
+#download.file(url_COVID, temp)
 
 # Utilizamos la función 'unz' para extraer el archivo CSV y lo asignamos a la variable 'temp'
-ArchivoCsv = unz(temp, "220209COVID19MEXICO.csv")
+#ArchivoCsv = unz(temp, "220209COVID19MEXICO.csv")
 # Introducimos los datos del CSV en la tabla.
 
 # AQUI MARCA ERROR NO SUPE SOLUCIONAR ASÍ QUE IMPORTE DIRETAMENTE DE FORMA LOCAL
@@ -240,7 +274,7 @@ ArchivoCsv = unz(temp, "220209COVID19MEXICO.csv")
 # Posible alternativa de lectura. Para seleccionar los datos directamente
 library("data.table")
 
-covid <- fread('/Users/danielfragoso/Downloads/220209COVID19MEXICO.csv',
+covid <- fread('/Users/danielfragoso/Downloads/220227COVID19MEXICO.csv',
                   select = c("CLASIFICACION_FINAL", "FECHA_SINTOMAS", "TIPO_PACIENTE", "ENTIDAD_RES", "FECHA_DEF",
                              "EDAD"))
 
@@ -279,6 +313,13 @@ ggplot(casos_mes, aes(x=month, y=N_casos, group=1)) +
   scale_x_date(date_labels = "%b/%y") +
   labs(y = "Números de Casos", x = "Meses")
 
+ggsave(
+  'Tareas/Tarea 1/Graphs/COVID_NC.pdf',
+  width = 25,
+  height = 17,
+  units = c("cm"),
+  dpi = 300,
+)
 # b)
 
 # Suma de 15 días
@@ -302,6 +343,13 @@ ggplot(hosp_mes, aes(x=month, y=N_hosp, group=1)) +
   scale_x_date(date_labels = "%b/%y") +
   labs(y = "Número de Hospitalizaciones", x = "Meses")
 
+ggsave(
+  'Tareas/Tarea 1/Graphs/COVID_NH.pdf',
+  width = 25,
+  height = 17,
+  units = c("cm"),
+  dpi = 300,
+)
 # c)
 
 # Vamos a generar un Merge Join para unir por mes 
@@ -323,6 +371,13 @@ ggplot(porc_mes, aes(x=month, y=porcentaje, group=1)) +
   scale_x_date(date_labels = "%b/%y") +
   labs(y = "% de Hospitalizados", x = "Meses")
 
+ggsave(
+  'Tareas/Tarea 1/Graphs/COVID_PH.pdf',
+  width = 25,
+  height = 17,
+  units = c("cm"),
+  dpi = 300,
+)
 # d)
 
 # La muerte viene en el registro 'FECHA_DEF'
@@ -351,6 +406,13 @@ ggplot(def_mes, aes(x=month, y=N_def, group=1)) +
   scale_x_date(date_labels = "%b/%y") +
   labs(y = "Número de Defunciones", x = "Meses")
 
+ggsave(
+  'Tareas/Tarea 1/Graphs/COVID_ND.pdf',
+  width = 25,
+  height = 17,
+  units = c("cm"),
+  dpi = 300,
+)
 ## 2.3 -------------------------------------------------------------------------
 
 # a)
@@ -434,4 +496,13 @@ ggplot(grupo_porc, aes(x=month, y = value, color = variable)) +
   scale_color_manual(values = cols) +
   scale_color_discrete(labels = c('0-20', '20-40', '40-60', '+60'))+
   guides(color = guide_legend(title = "Grupos de Edad"))
+
+ggsave(
+  'Tareas/Tarea 1/Graphs/COVID_GE.pdf',
+  width = 25,
+  height = 17,
+  units = c("cm"),
+  dpi = 300,
+)
+
 
