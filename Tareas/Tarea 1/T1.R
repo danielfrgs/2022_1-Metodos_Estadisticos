@@ -110,16 +110,18 @@ ggplot(df, aes(reorder(PEA_estatal$NOM_ENT, PEA_estatal$PEA_P),
   geom_bar(position= "stack", stat = 'identity') + theme_minimal() +
   #geom_text(aes(label = percent(PEA_estatal$PEA_P)), vjust = 0.5, angle=90, hjust=1)+
   theme(legend.position = "none", 
-        axis.text.x = element_text(angle=60, hjust=1, vjust = 1)) +
+        axis.text.x = element_text(angle=60, hjust=1, vjust = 1), 
+        plot.title = element_text(family = "Helvetica", face = "bold", size = (14))) +
   scale_y_continuous(labels = percent_format()) +
   #coord_flip(expand = FALSE) +
   scale_fill_manual(values=c("#F95C5C", "#F4C2A9")) +
-  labs(y = "% de Población Economicamente Activa", x = "Entidad")
+  labs(y = "% de Población Economicamente Activa", x = "Entidad", title = 'Porcentaje de P.E.A. por Estado')
+  
 
 ggsave(
-  'Tareas/Tarea 1/Graphs/PEA_1.pdf',
-  width = 25,
-  height = 17,
+  'Graphs/PEA_1.pdf',
+  width = 25*0.8,
+  height = 15*0.8,
   units = c("cm"),
   dpi = 300,
 )
@@ -154,16 +156,17 @@ ggplot(df, aes(reorder(PEA_cdmx$NOM_MUN, PEA_cdmx$PEA_P),
   geom_bar(position= "stack", stat = 'identity') + theme_minimal() +
   #geom_text(aes(label = percent(PEA_estatal$PEA_P)), vjust = 0.5, angle=90, hjust=1)+
   theme(legend.position = "none", 
-        axis.text.x = element_text(angle=60, hjust=1, vjust = 1)) +
+        axis.text.x = element_text(angle=60, hjust=1, vjust = 1), 
+        plot.title = element_text(family = "Helvetica", face = "bold", size = (14))) +
   scale_y_continuous(labels = percent_format()) +
   #coord_flip(expand = FALSE) +
   scale_fill_manual(values=c("#F95C5C", "#F4C2A9")) +
-  labs(y = "% de Población Economicamente Activa", x = "Delegación")
+  labs(y = "% de Población Economicamente Activa", x = "Delegación", title = 'Porcentaje de P.E.A. en la CDMX')
 
 ggsave(
-  'Tareas/Tarea 1/Graphs/PEA_CDMX.pdf',
-  width = 25,
-  height = 17,
+  'Graphs/PEA_CDMX.pdf',
+  width = 25*0.8,
+  height = 15*0.8,
   units = c("cm"),
   dpi = 300,
 )
@@ -199,15 +202,18 @@ ggplot(df, aes(municipios$P_LI,  municipios$P_A)) +
     geom_point(alpha = 0.5, colour = "#F95C5C")+
     theme_minimal() +
     #geom_text(aes(label = percent(PEA_estatal$PEA_P)), vjust = 0.5, angle=90, hjust=1)+
-    theme(legend.position = "none") +
+    theme(legend.position = "none", 
+          plot.title = element_text(family = "Helvetica", face = "bold", size = (14))) +
     scale_y_continuous(labels = percent_format()) +
     scale_x_continuous(labels = percent_format()) +
-    labs(y = "% de Población Analfabeta", x = "% de Población que habla una Lengua Indígena")
+    labs(y = "% de Población Analfabeta", x = "% de Población que habla una Lengua Indígena", 
+         title = 'Población Analfabeta contra Hablantes de una Lengua Indígena \na nivel Municipal') +
+    geom_smooth(method=lm , color="#566573", fill="#85929E", se=TRUE)
 
 ggsave(
-  'Tareas/Tarea 1/Graphs/PALI_1.pdf',
-  width = 25,
-  height = 17,
+  'Graphs/PALI_1.pdf',
+  width = 25*0.8,
+  height = 15*0.8,
   units = c("cm"),
   dpi = 300,
 )
@@ -217,15 +223,17 @@ ggplot(municipios, aes(P_15YMAS, P_A)) +
   geom_point(alpha = 0.5, colour = "#F95C5C")+
   theme_minimal() +
   #geom_text(aes(label = percent(PEA_estatal$PEA_P)), vjust = 0.5, angle=90, hjust=1)+
-  theme(legend.position = "none") +
+  theme(legend.position = "none", 
+        plot.title = element_text(family = "Helvetica", face = "bold", size = (14))) +
   scale_y_continuous(labels = percent_format()) +
   #scale_x_continuous(labels = percent_format()) +
-  labs(y = "% de Población Analfabeta", x = "Población de 15 años y más")
+  labs(y = "% de Población Analfabeta", x = "Población de 15 años y más", 
+       title = 'Población Analfabeta contra Población \na nivel Municipal')
 
 ggsave(
-  'Tareas/Tarea 1/Graphs/PA15_1.pdf',
-  width = 25,
-  height = 17,
+  'Graphs/PA15_1.pdf',
+  width =15*0.8,
+  height = 15*0.8,
   units = c("cm"),
   dpi = 300,
 )
@@ -234,16 +242,18 @@ ggplot(municipios, aes(P_5YMAS, P_LI)) +
   geom_point(alpha = 0.5, colour = "#F95C5C")+
   theme_minimal() +
   #geom_text(aes(label = percent(PEA_estatal$PEA_P)), vjust = 0.5, angle=90, hjust=1)+
-  theme(legend.position = "none") +
+  theme(legend.position = "none", 
+        plot.title = element_text(family = "Helvetica", face = "bold", size = (14))) +
   scale_y_continuous(labels = percent_format()) +
   #scale_x_continuous(labels = percent_format()) +
-  labs(y = "% de Población que habla una Lengua Indígena", x = "Población de 15 años y más")
+  labs(y = "% de Población que habla una Lengua Indígena", x = "Población de 5 años y más", 
+       title = 'Población Hablante de una Lengua Indígena \ncontra Población a nivel Municipal')
 
 
 ggsave(
-  'Tareas/Tarea 1/Graphs/LI15_1.pdf',
-  width = 25,
-  height = 17,
+  'Graphs/LI15_1.pdf',
+  width = 15*0.8,
+  height = 15 * 0.8,
   units = c("cm"),
   dpi = 300,
 )
@@ -308,15 +318,17 @@ ggplot(casos_mes, aes(x=month, y=N_casos, group=1)) +
   geom_line(color="#F95C5C", size=1.2) +
   geom_point(color="#F95C5C", alpha = 0.7, size=1.5) +
   theme_minimal() +
-  theme(legend.position = "none", axis.text.x = element_text(angle=45, hjust = 1)) +
+  theme(legend.position = "none", axis.text.x = element_text(angle=45, hjust = 1), 
+        plot.title = element_text(family = "Helvetica", face = "bold", size = (14))) +
   scale_y_continuous(label=comma) +
   scale_x_date(date_labels = "%b/%y") +
-  labs(y = "Números de Casos", x = "Meses")
+  labs(y = "Números de Casos", x = "Meses", 
+       title = 'Número de Contagios Registrados Mensualmente \nen la CDMX')
 
 ggsave(
-  'Tareas/Tarea 1/Graphs/COVID_NC.pdf',
-  width = 25,
-  height = 17,
+  'Graphs/COVID_NC.pdf',
+  width = 25 * 0.8,
+  height = 15 * 0.8,
   units = c("cm"),
   dpi = 300,
 )
@@ -338,15 +350,17 @@ ggplot(hosp_mes, aes(x=month, y=N_hosp, group=1)) +
   geom_line(color="#F95C5C", size=1.2) +
   geom_point(color="#F95C5C", alpha = 0.7, size=1.5) +
   theme_minimal() +
-  theme(legend.position = "none", axis.text.x = element_text(angle=45, hjust = 1)) +
+  theme(legend.position = "none", axis.text.x = element_text(angle=45, hjust = 1), 
+        plot.title = element_text(family = "Helvetica", face = "bold", size = (14))) +
   scale_y_continuous(label=comma) +
   scale_x_date(date_labels = "%b/%y") +
-  labs(y = "Número de Hospitalizaciones", x = "Meses")
+  labs(y = "Número de Hospitalizaciones", x = "Meses", 
+       title = 'Número de Hospitalizaciones Registradas Mensualmente \nen la CDMX')
 
 ggsave(
-  'Tareas/Tarea 1/Graphs/COVID_NH.pdf',
-  width = 25,
-  height = 17,
+  'Graphs/COVID_NH.pdf',
+  width = 25 * 0.8,
+  height = 15 * 0.8,
   units = c("cm"),
   dpi = 300,
 )
@@ -366,15 +380,17 @@ ggplot(porc_mes, aes(x=month, y=porcentaje, group=1)) +
   geom_line(color="#F95C5C", size=1.2) +
   geom_point(color="#F95C5C", alpha = 0.7, size=1.5) +
   theme_minimal() +
-  theme(legend.position = "none", axis.text.x = element_text(angle=45, hjust = 1)) +
+  theme(legend.position = "none", axis.text.x = element_text(angle=45, hjust = 1), 
+        plot.title = element_text(family = "Helvetica", face = "bold", size = (14))) +
   scale_y_continuous(labels = percent_format()) +
   scale_x_date(date_labels = "%b/%y") +
-  labs(y = "% de Hospitalizados", x = "Meses")
+  labs(y = "% de Hospitalizados", x = "Meses", 
+       title = 'Porcentaje de Hospitalizaciones Registradas Mensualmente \nen la CDMX')
 
 ggsave(
-  'Tareas/Tarea 1/Graphs/COVID_PH.pdf',
-  width = 25,
-  height = 17,
+  'Graphs/COVID_PH.pdf',
+  width = 25*0.8,
+  height = 15*0.8,
   units = c("cm"),
   dpi = 300,
 )
@@ -401,15 +417,47 @@ ggplot(def_mes, aes(x=month, y=N_def, group=1)) +
   geom_line(color="#F95C5C", size=1.2) +
   geom_point(color="#F95C5C", alpha = 0.7, size=1.5) +
   theme_minimal() +
-  theme(legend.position = "none", axis.text.x = element_text(angle=45, hjust = 1)) +
+  theme(legend.position = "none", axis.text.x = element_text(angle=45, hjust = 1),
+        plot.title = element_text(family = "Helvetica", face = "bold", size = (14))) +
   scale_y_continuous(label=comma) +
   scale_x_date(date_labels = "%b/%y") +
-  labs(y = "Número de Defunciones", x = "Meses")
+  labs(y = "Número de Defunciones", x = "Meses", 
+       title = 'Número de Defunciones Registradas Mensualmente \nen la CDMX')
 
 ggsave(
-  'Tareas/Tarea 1/Graphs/COVID_ND.pdf',
-  width = 25,
-  height = 17,
+  'Graphs/COVID_ND.pdf',
+  width = 25*0.8,
+  height = 15*0.8,
+  units = c("cm"),
+  dpi = 300,
+)
+
+# Ahora para porcentaje de defunciones.
+# Vamos a generar un Merge Join para unir por mes 
+
+porc_mes_def <- merge(x = casos_mes, y = def_mes, all = TRUE)
+
+# Calculo de porcentaje
+
+porc_mes_def$porcentaje <- porc_mes_def$N_def/porc_mes_def$N_casos
+
+# Grafica
+
+ggplot(porc_mes_def, aes(x=month, y=porcentaje, group=1)) +
+  geom_line(color="#F95C5C", size=1.2) +
+  geom_point(color="#F95C5C", alpha = 0.7, size=1.5) +
+  theme_minimal() +
+  theme(legend.position = "none", axis.text.x = element_text(angle=45, hjust = 1), 
+        plot.title = element_text(family = "Helvetica", face = "bold", size = (14))) +
+  scale_y_continuous(labels = percent_format()) +
+  scale_x_date(date_labels = "%b/%y") +
+  labs(y = "% de Defunciones", x = "Meses", 
+       title = 'Porcentaje de Defuciones Registradas Mensualmente \nen la CDMX')
+
+ggsave(
+  'Graphs/COVID_PD.pdf',
+  width = 25*0.8,
+  height = 15*0.8,
   units = c("cm"),
   dpi = 300,
 )
@@ -489,18 +537,20 @@ cols <- c("#5CB85C", "#46B8DA", "#EEA236", "#F95C5C")
 ggplot(grupo_porc, aes(x=month, y = value, color = variable)) +
   geom_line(size=1.2) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle=45, hjust = 1)) +
+  theme(axis.text.x = element_text(angle=45, hjust = 1), 
+        plot.title = element_text(family = "Helvetica", face = "bold", size = (14))) +
   scale_y_continuous(label = percent_format()) +
   scale_x_date(date_labels = "%b/%y") +
-  labs(y = "% de Hospitalziaciones por Grupo", x = "Meses") +
+  labs(y = "% de Hospitalziaciones por Grupo", x = "Meses", 
+       title = 'Porcentaje de Hospitalizaciones Registradas Mensualmente \n en la CDMX por Grupos de Edad') +
   scale_color_manual(values = cols) +
   scale_color_discrete(labels = c('0-20', '20-40', '40-60', '+60'))+
   guides(color = guide_legend(title = "Grupos de Edad"))
 
 ggsave(
-  'Tareas/Tarea 1/Graphs/COVID_GE.pdf',
-  width = 25,
-  height = 17,
+  'Graphs/COVID_GE.pdf',
+  width = 25*0.8,
+  height = 15*0.8,
   units = c("cm"),
   dpi = 300,
 )
