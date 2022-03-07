@@ -555,4 +555,118 @@ ggsave(
   dpi = 300,
 )
 
+# Ejercicio 3 ------------------------------------------------------------------
+
+
+# Funci?n que simula la variable aleatoria X = Ganancia del juego, pagando m
+# para entrar y escogiendo el n?mero n, ?ste ?ltimo puede tomar el valor de 
+# 'azar' para elegir n al azar
+X <- function(m,n){
+  # Si se eligi? la estrategia 'azar', se escoge un n?mero al azar del 1 al 6
+  if(n=='azar'){
+    n = sample(1:6,1)
+  }
+  # La ganancia empieza en -m que es lo que cost? entrar al juego
+  ganancia = -m
+  # Se tiran 3 dados
+  for(i in 1:3){
+    dado = sample(1:6,1)
+    # Por cada cado que sale n, se gana m
+    if(dado == n){
+      ganancia = ganancia + m
+    }
+  }
+  # Devolver la ganancia
+  return(ganancia)
+}
+
+# Funci?n que estima la funci?n de probabilidad, la esperanza y la  arianza de
+# la variable aleatoria X usando la estrategia de pagar m y escoger n, con
+# N simulaciones
+estima <- function(m,n,N){
+  # Simula una muestra aleatoria de tama?no N de X
+  Xs = c()
+  for(i in 1:N){
+    Xs = c(Xs,X(m,n))
+  }
+  print(paste('Estrategia: n =', n, 'm =', m))
+  # Estima la funci?n de probabilidad
+  for(i in c(-m,0,m,2*m)){
+    print(paste('P( X=',i,')','= f_X(', i, ') = ', sum(Xs==i)/length(Xs)))
+  }
+  # Estima la esperanza
+  print(paste('Esperanza: ', mean(Xs)))
+  # Estima la varianza
+  print(paste('Varianza: ', var(Xs)))
+}
+
+# Usa la funci?n estima(m,n,N) para responder lo solicitado en la tarea
+# con N=10,000
+estima(10,6,10000)
+estima(115,6,10000)
+estima(10, 'azar', 10000)
+
+# Ejercicio 4 ------------------------------------------------------------------
+
+# Funci?n que simula la variable aleatoria Y = N?mero de personas que cruzan el
+# puente, dado que el puente tiene N pares de pelda?os y J jugadores
+Y <- function(N,J){
+  # La i-?sima entrada de la  variable 'estables' guarda el i-?simo pelda?o que
+  # no se rompe al pisarlo, 1 es el de la derecha y 2 el de la izquierda
+  estables = sample(1:2,N,replace = T)
+  # Se empiezan con J jugadores
+  jugadores = J
+  # Se inicia en el "pelda?o" 0
+  actual = 0
+  # Mientras haya jugadores:
+  while(jugadores > 0){
+    # El jugador que lidera la fila escoge su pelda?o, izquierda (2) o derecha (1)
+    eleccion = sample(1:2,1)
+    # Si el pelda?o que escogi? no coincide con el pelda?o que no se rompe:
+    if(eleccion != estables[actual+1]){
+      # Se cae un jugador
+      jugadores = jugadores -1
+      # Si ya no hay m?s jugadores, entonces 0 personas lograron pasar el puente
+      if(jugadores == 0){
+        return(0)
+      }
+    }
+    # Ya sea que el jugador se haya caido o no se avanza una posici?n, pues si
+    # no se cay? significa que s? avanz?, y si se cay? entonces el de atr?s
+    # ya sabe cu?l es el pelda?o correcto
+    actual = actual + 1
+    # Si ya se alcanz? el N-?simo pelda?o, todos los jugadores restantes pasan
+    # el puente
+    if(actual == N){
+      return(jugadores)
+    }
+  } 
+}
+
+# Funci?n que estima lo solicitado en el ejercicio 4
+estima2 <- function(N,J,size){
+  # Simula una muestra aleatoria de tama?o 'size' de Y
+  Ys = c()
+  for(i in 1:size){
+    Ys = c(Ys,Y(N,J))
+  }
+  print(paste('Pelda?os =', N, 'Jugadores =', J))
+  # Estima la probabilidad de que al menos pasen la mitad de los jugadores
+  print(paste('P( Al menos pasen la mitad de los jugadores ) =', sum(Ys >= J/2)/length(Ys)))
+  # Estima el promedio de los jugadores que pasan
+  promedio = mean(Ys)
+  print(paste('Juadores que pasan en promedio: ', promedio))
+  # Estima la probabilidad que que crucen menos que el promedio (el simulado)
+  print(paste('P( Crucen menos jugadores que el promedio ) =', sum(Ys<promedio)/length(Ys)))
+  # Estima el promedio de jugadores que cruzan condicionado a que cruzar?n m?s de 5
+  print(paste('Promedio de jugadores que cruzan dado que cruzaron m?s de 5:', mean(Filter(function(x) x>5, Ys))))
+  # Encuentra un intervalo al 90% de confianza de la cantidad de jugadores que 
+  # cruzar? el puente
+  cuantiles = quantile(Ys, probs = c(.05, .95),type = 1)
+  print(paste('Intervalo de confianza del 90% de cu?ntos jugadores cruzar?n: [',cuantiles[1], ',', cuantiles[2], ']'))
+}
+
+# Usa la funci?n etima2(N, J, size) para responder las preguntas del ejercicio 4
+estima2(18,16,10000)
+
 
