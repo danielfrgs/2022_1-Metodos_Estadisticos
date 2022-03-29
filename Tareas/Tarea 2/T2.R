@@ -10,6 +10,48 @@ library(tidyverse)
 
 # CAPITULO 8
 
+
+  
+# Ejercicio 8.3
+#Supones que t_3 es una distribución t de student con parámetro 3
+  
+  
+#Creamos una muestra con esa distribución
+n <- 25
+Xn=rt(n,df=3)
+
+#Definimos nuestro funcional
+Tn <- function(x){
+  return ((quantile(x, 0.75)-quantile(x,0.25))/1.34)
+}
+
+#Simulación Bootsrtap
+B <- 100000
+Tboot <- rep(NA, B)
+for(i in 1:B){
+  Xn_estrella <- sample(Xn, size=n, replace=TRUE)
+  Tboot[i] <- Tn(Xn_estrella) 
+}
+
+#Error estándar estimado Bootstrap
+se_boot <- sqrt((1/B)*sum((Tboot-mean(Tboot))^2))
+
+#Intervalos de confianza
+aalpha <- 0.05
+Normal <- Tn(Xn)+c(-1,1)*qnorm(1-aalpha/2)*se_boot
+Percentile <- quantile(Tboot, probs=c(aalpha/2, 1-aalpha/2))
+Pivotal <- 2*Tn(Xn)-c(1,1)*quantile(Tboot, probs = c(1-aalpha/2, aalpha/2))
+
+print('El intervalo Normal: ')
+Normal
+print('El intervalo Percentile: ')
+Percentile
+print('El intervalo Pivotal: ')
+Pivotal
+
+#Valor Teórico
+Tn(Xn)
+
 # P2
 
 Fn_hat <- function(x0, xn) {
@@ -148,7 +190,7 @@ pdf('/Volumes/GoogleDrive/Mi unidad/Universidad/Ciencia de Datos/6to Semestre/20
     width = 7,
     height = 5)
 
-plot(x, sapply(x, T.hat), type = 's', 
+plot(x, sapply(x, T.hat), type = 'l', 
      col = '#FF8E3F', lwd = 2.5, main = 'Distribución de Theta', xlim=c(0.8,1), 
      xlab = 'x', ylab = 'Densidad', 
      col.axis = "#5F5F5F", col.lab = "#5F5F5F", fg = "#5F5F5F")
@@ -233,19 +275,35 @@ hist(Dist, #breaks = 'FD',
 dev.off()
 
 
-# con muestreo:
 
-pdf('/Volumes/GoogleDrive/Mi unidad/Universidad/Ciencia de Datos/6to Semestre/2022_1-Metodos_Estadisticos/Tareas/Tarea 2/Graphs/Dist.pdf',
-    width = 7,
-    height = 5)
 
-plot(diff(sapply(x, T.hat)), type = 's', 
-     col = '#FF8E3F', lwd = 2.5, main = 'Distribución de Theta', xlim=c(0.8,1), 
-     xlab = 'x', ylab = 'Densidad', 
-     col.axis = "#5F5F5F", col.lab = "#5F5F5F", fg = "#5F5F5F")
+
+pdf('/Volumes/GoogleDrive/Mi unidad/Universidad/Ciencia de Datos/6to Semestre/2022_1-Metodos_Estadisticos/Tareas/Tarea 2/Graphs/B_hist.pdf',
+    width = 8,
+    height = 6)
+
+# Interpolación
+p2 <- hist(Tboot, #breaks = 'FD', 
+           probability = TRUE,
+           col = '#BD2C5A', main = 'Histogramas Boostrap',
+           border = 'white', xlab = 'x', ylab = 'Densidad', 
+           col.axis = "#5F5F5F", col.lab = "#5F5F5F", fg = "#5F5F5F", 
+           xlim=c(0.8,1))
+
+p1 <- hist(Tboot_p, #breaks = 'FD', 
+           probability = TRUE,
+           col = '#FF8E3F', main = '10, 000 Boostrap Paramétrco',
+           border = 'white', xlab = 'x', ylab = 'Densidad', 
+           col.axis = "#5F5F5F", col.lab = "#5F5F5F", fg = "#5F5F5F", 
+           xlim=c(0.8,1), add = T)                    # centered at 4
+                   # centered at 6
+
+lines(density(Dist), # density plot
+      lwd = 2, # thickness of line
+      col = "black")
+
+legend("topleft", c("Boostrap 'ideal'", "Boostrap 'real'", "Distribución de Theta"), 
+       lwd = c(5, 5, 3), col=c("#FF8E3F", "#BD2C5A", 'black'),
+       xpd=TRUE, cex=0.7, bty='n')
 
 dev.off()
-
-diff(sapply(x, T.hat))
-
-sapply(x, T.hat)
