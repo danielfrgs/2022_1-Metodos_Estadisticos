@@ -116,6 +116,10 @@ print(paste('Intervalo de confianza del 90% de la media: (', intervalo[1], ',',
             intervalo[2],')'))
 print(paste('Estimaci?n de la mediana:', estimador_mediana))
 
+
+# CAPITULO 8
+
+
 # Ejercicio 8.2 ----------------------------------------------------------------
 
 # Estimador plug-in asimetr?a
@@ -191,9 +195,6 @@ print(paste('Cobertura normal', sum(cobertura_normal)/N))
 print(paste('Cobertura cuantiles', sum(cobertura_cuantiles)/N))
 print(paste('Cobertura pivotal', sum(cobertura_pivotal)/N))
 
-
-# CAPITULO 8
-
 # Ejercicio 8.3 ----------------------------------------------------------------
 #Supones que t_3 es una distribuci?n t de student con par?metro 3
 
@@ -233,114 +234,6 @@ Pivotal
 
 #Valor Te?rico
 Tn(Xn)
-
-
-
-# Ejercicio 8.2 ------------------------------------------------------------------
-
-Fn_hat <- function(x0, xn) {
-  mean(xn <= x0)
-}
-
-Fn_hat_gen <- function(x, xn){
-  m <- length(x)
-  if(m > 1){
-    yhat <- Fn_hat(x[1], xn)
-    for(i in 2:m) {
-      yhat <- c(yhat, Fn_hat(x[i], xn))
-    }
-  }else{
-    yhat <- Fn_hat(x, xn)
-  }
-  yhat
-}
-
-x = seq(-5, 5, length.out = 1000)
-y = pnorm(x)
-n = 100
-alpha = .05
-epsilon = sqrt((1/(2*n))*log(2/alpha))
-contador_norm = 0
-
-for(i in 1:1000){
-  xn = rnorm(n)
-  yhat = Fn_hat_gen(x, xn)
-  Lx = yhat - epsilon
-  Ux = yhat + epsilon
-  if(all(Ux > y) & all(c(Lx < y))){
-    contador_norm = contador_norm + 1
-  }
-}
-
-y = pcauchy(x)
-contador_cauchy = 0
-
-for(i in 1:1000){
-  xn = rcauchy(n)
-  yhat = Fn_hat_gen(x, xn)
-  Lx = yhat - epsilon
-  Ux = yhat + epsilon
-  if(all(Ux > y) & all(c(Lx < y))){
-    contador_cauchy = contador_cauchy + 1
-  }
-}
-
-print(paste('Qued? dentro de la banda', contador_norm, 'veces (Normal)'))
-print(paste('Qued? dentro de la banda', contador_cauchy, 'veces (Cauchy)'))
-#------------------------------------------------------------------------------
-# Estimador plug-in asimetr?a
-my_skewness<- function(x){
-  x_bar <- mean(x)
-  d <- x - x_bar
-  m3 <- mean(d^3)
-  m4 <- mean(d^2)^(3/2)
-  m3/m4
-}
-
-n = 50
-alpha = .05
-B = 100000
-valor_real = (exp(1)+2)*sqrt(exp(1)-1)
-N = 1000
-
-cobertura_normal = rep(F, N)
-cobertura_cuantiles = rep(F, N)
-cobertura_pivotal = rep(F, N)
-
-for(i in 1:N){
-  Y = rnorm(n)
-  X = exp(Y)
-  estimador = my_skewness(X)
-  
-  estimador_estrella = rep(NA, B) 
-  for (t in 1:B) {
-    xn_estrella = sample(X, size = n, replace = TRUE)
-    estimador_estrella[t] = my_skewness(xn_estrella)
-  }
-  
-  # Intervalo asint?tico Normal
-  sd_bootstrap = sqrt((1/B)*sum((estimador_estrella - mean(estimador_estrella))^2))
-  intervalo_normal = estimador + c(-1, 1)*qnorm(1-alpha/2)*sd_bootstrap
-  if(intervalo_normal[1] < valor_real & valor_real < intervalo_normal[2]){
-    cobertura_normal[i] = T
-  }
-  
-  # Intervalo cuantiles
-  intervalo_cuantiles = unname(quantile(estimador_estrella, probs = c(alpha/2, 1 - alpha/2)))
-  if(intervalo_cuantiles[1] < valor_real & valor_real < intervalo_cuantiles[2]){
-    cobertura_cuantiles[i] = T
-  }
-  
-  # Intervalo Pivotal
-  intervalo_pivotal = c(2*estimador-intervalo_cuantiles[2],2*estimador-intervalo_cuantiles[1])
-  if(intervalo_pivotal[1] < valor_real & valor_real < intervalo_pivotal[2]){
-    cobertura_pivotal[i] = T
-  }
-}
-
-print(paste('Cobertura normal', sum(cobertura_normal)/N))
-print(paste('Cobertura cuantiles', sum(cobertura_cuantiles)/N))
-print(paste('Cobertura pivotal', sum(cobertura_pivotal)/N))
 
 # Ejercicio 8.7 -----------------------------------------------------------
 
