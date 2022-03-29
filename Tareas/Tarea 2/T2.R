@@ -7,16 +7,198 @@ library(scales)
 library(tidyverse)
 
 ##########################################
+# CAPITULO 7
+
+# Ejercicio 7.3 ----------------------------------------------------------------
+
+# Funci?n de distribuci?n emp?rica para un punto
+Fn_hat <- function(x0, xn) {
+  mean(xn <= x0)
+}
+
+# Funci?n de distribuci?n emp?rica para varios puntos
+Fn_hat_gen <- function(x, xn){
+  m <- length(x)
+  if(m > 1){
+    yhat <- Fn_hat(x[1], xn)
+    for(i in 2:m) {
+      yhat <- c(yhat, Fn_hat(x[i], xn))
+    }
+  }else{
+    yhat <- Fn_hat(x, xn)
+  }
+  yhat
+}
+
+# Partici?n del eje x
+x = seq(-5, 5, length.out = 1000)
+# Evaluaci?n de la funci?n de distribuci?n real en la partici?n
+y = pnorm(x)
+# N?mero de observaciones
+n = 100
+# 1-confianza
+alpha = .05
+# epsilon para la banda de confianza
+epsilon = sqrt((1/(2*n))*log(2/alpha))
+# Contador de veces que la funci?n de distribuci?n real cae dentro de la 
+# banda de confianza 
+contador_norm = 0
+
+# 1000 repeticiones
+for(i in 1:1000){
+  # Simular 100 observaciones de la normal(0,1)
+  xn = rnorm(n)
+  # Evaluar la funci?n de distribuci?n emp?rica en la partici?n
+  yhat = Fn_hat_gen(x, xn)
+  # Definir l?mites superior e inferior de la banda de confianza
+  Lx = yhat - epsilon
+  Ux = yhat + epsilon
+  # Si la funci?n de distribuci?n real cae dentro de la banda de confianza, 
+  # entonces aumenta el contador en 1
+  if(all(Ux > y) & all(c(Lx < y))){
+    contador_norm = contador_norm + 1
+  }
+  # Graficar la primera banda
+  if(i == 1){
+    plot(x, y, type = "l", lwd = 2, col = "blue", xlab = '', ylab = '')
+    lines(x, Lx, type = "l", col = "green")
+    lines(x, Ux, type = "l", col = "green")
+    title('Banda de confianza al 95% para la funci?n de \n distribuci?n de una v.a. Normal(0,1)')
+  }
+}
+
+# Repetir el experimento para una distribuci?n Cauchy
+y = pcauchy(x)
+contador_cauchy = 0
+
+for(i in 1:1000){
+  xn = rcauchy(n)
+  yhat = Fn_hat_gen(x, xn)
+  Lx = yhat - epsilon
+  Ux = yhat + epsilon
+  if(all(Ux > y) & all(c(Lx < y))){
+    contador_cauchy = contador_cauchy + 1
+  }
+  if(i == 1){
+    plot(x, y, type = "l", lwd = 2, col = "blue", xlab = '', ylab = '')
+    lines(x, Lx, type = "l", col = "green")
+    lines(x, Ux, type = "l", col = "green")
+    title('Banda de confianza al 95% para la funci?n de \n distribuci?n de una v.a. Cauchy(0,1)')
+  }
+}
+
+# Imprimir resultados
+print(paste('Qued? dentro de la banda', contador_norm, 'veces (Normal)'))
+print(paste('Qued? dentro de la banda', contador_cauchy, 'veces (Cauchy)'))
+
+# Ejercicio 7.8 ----------------------------------------------------------------
+
+# Descarga los datos
+library(MASS)
+datos = as.vector(t(geyser['waiting']))
+# 1-confianza
+alpha = .1
+
+# Estima la media
+estimador_media = mean(datos)
+# Estima la desviaci?n est?ndar de la estimaci?n de la media
+estimador_sigma = sqrt(1/(length(datos))*(sum((datos-mean(datos))^2)))
+estimador_sigma_media = estimador_sigma/(sqrt(length(datos)))
+# Da un intervalo de confianza para la media
+intervalo = estimador_media + c(-1, 1)*qnorm(1-alpha/2)*estimador_sigma_media
+# Estima la mediana
+estimador_mediana = quantile(datos, probs = .5)
+
+# Imprime las estimaciones solicitadas
+print(paste('Estimaci?n de la media:', estimador_media))
+print(paste('Estimaci?n del error est?ndar de la estimaci?n de la media', estimador_sigma_media))
+print(paste('Intervalo de confianza del 90% de la media: (', intervalo[1], ',',
+            intervalo[2],')'))
+print(paste('Estimaci?n de la mediana:', estimador_mediana))
+
+# Ejercicio 8.2 ----------------------------------------------------------------
+
+# Estimador plug-in asimetr?a
+my_skewness<- function(x){
+  x_bar <- mean(x)
+  d <- x - x_bar
+  m3 <- mean(d^3)
+  m4 <- mean(d^2)^(3/2)
+  m3/m4
+}
+
+# N?mero de observaciones
+n = 50
+# 1-confianza
+alpha = .05
+# N?mero de muestras de la funci?n de distribuci?n emp?rica
+B = 200
+# Valor real de la asimetr?a 
+valor_real = (exp(1)+2)*sqrt(exp(1)-1)
+# N?mero de repeticiones
+N = 1000
+
+# Intervalos que indican si en la i-?sima repetici?n el valor real de la
+# asimetr?a cae dentro del intervalo estimado 
+cobertura_normal = rep(F, N)
+cobertura_cuantiles = rep(F, N)
+cobertura_pivotal = rep(F, N)
+
+# Hacer N repeticiones
+for(i in 1:N){
+  # Simular n observaciones de la normal(0,1)
+  Y = rnorm(n)
+  # Definir X=e^Y
+  X = exp(Y)
+  # Estimar puntualmente a la asimetr?a
+  estimador = my_skewness(X)
+  
+  # Vector que guarda las B estimaciones de la asimetr?a con las simulaciones de 
+  # la funci?n de distribuci?n emp?rica
+  estimador_estrella = rep(NA, B)
+  # Estima la asimetr?a con las simulaciones de la funci?n de distribuci?n emp?rica
+  for (t in 1:B) {
+    xn_estrella = sample(X, size = n, replace = TRUE)
+    estimador_estrella[t] = my_skewness(xn_estrella)
+  }
+  
+  # Calcula los tres tipos de intervalo de confianza e indica si el valor real
+  # cae dentro de dicho intervalo
+  
+  # Intervalo asint?tico Normal
+  sd_bootstrap = sqrt((1/B)*sum((estimador_estrella - mean(estimador_estrella))^2))
+  intervalo_normal = estimador + c(-1, 1)*qnorm(1-alpha/2)*sd_bootstrap
+  if(intervalo_normal[1] < valor_real & valor_real < intervalo_normal[2]){
+    cobertura_normal[i] = T
+  }
+  
+  # Intervalo cuantiles
+  intervalo_cuantiles = unname(quantile(estimador_estrella, probs = c(alpha/2, 1 - alpha/2)))
+  if(intervalo_cuantiles[1] < valor_real & valor_real < intervalo_cuantiles[2]){
+    cobertura_cuantiles[i] = T
+  }
+  
+  # Intervalo Pivotal
+  intervalo_pivotal = c(2*estimador-intervalo_cuantiles[2],2*estimador-intervalo_cuantiles[1])
+  if(intervalo_pivotal[1] < valor_real & valor_real < intervalo_pivotal[2]){
+    cobertura_pivotal[i] = T
+  }
+}
+
+# Devuelve la proporci?n en que el valor real de la asimetr?a cay? dentro del
+# intervalo de confianza estimado
+print(paste('Cobertura normal', sum(cobertura_normal)/N))
+print(paste('Cobertura cuantiles', sum(cobertura_cuantiles)/N))
+print(paste('Cobertura pivotal', sum(cobertura_pivotal)/N))
+
 
 # CAPITULO 8
 
+# Ejercicio 8.3 ----------------------------------------------------------------
+#Supones que t_3 es una distribuci?n t de student con par?metro 3
 
-  
-# Ejercicio 8.3
-#Supones que t_3 es una distribución t de student con parámetro 3
-  
-  
-#Creamos una muestra con esa distribución
+
+#Creamos una muestra con esa distribuci?n
 n <- 25
 Xn=rt(n,df=3)
 
@@ -25,7 +207,7 @@ Tn <- function(x){
   return ((quantile(x, 0.75)-quantile(x,0.25))/1.34)
 }
 
-#Simulación Bootsrtap
+#Simulaci?n Bootsrtap
 B <- 100000
 Tboot <- rep(NA, B)
 for(i in 1:B){
@@ -33,7 +215,7 @@ for(i in 1:B){
   Tboot[i] <- Tn(Xn_estrella) 
 }
 
-#Error estándar estimado Bootstrap
+#Error est?ndar estimado Bootstrap
 se_boot <- sqrt((1/B)*sum((Tboot-mean(Tboot))^2))
 
 #Intervalos de confianza
@@ -49,10 +231,12 @@ Percentile
 print('El intervalo Pivotal: ')
 Pivotal
 
-#Valor Teórico
+#Valor Te?rico
 Tn(Xn)
 
-# P2
+
+
+# Ejercicio 8.2 ------------------------------------------------------------------
 
 Fn_hat <- function(x0, xn) {
   mean(xn <= x0)
@@ -158,7 +342,7 @@ print(paste('Cobertura normal', sum(cobertura_normal)/N))
 print(paste('Cobertura cuantiles', sum(cobertura_cuantiles)/N))
 print(paste('Cobertura pivotal', sum(cobertura_pivotal)/N))
 
-# P7
+# Ejercicio 8.7 -----------------------------------------------------------
 
 # Vamos a generar un conjunto de datos de tamaño 50 con $\theta=1$
 # Bajo la distribución uniforme:
